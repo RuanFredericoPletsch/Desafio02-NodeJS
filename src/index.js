@@ -9,20 +9,70 @@ app.use(cors());
 
 const users = [];
 
+//Middleware -> Verifica se o usuario existe
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  //try{const {username} = request.headers}catch(error){console.log(request.headers)}
+  const {username} = request.headers
+
+  const user = users.find(user => user.username === username)
+
+  if(!user){
+    return response.status(404).json({error: 'User do not exist'})
+  }
+
+  request.user = user
+
+  return next();
 }
 
+//Middleware -> Verifica se o usuario pode criar novas todos
+//Requisitos para passar -> ser PRO ou ter criado menos de 10 todos
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  
+  //try{const {username} = request.headers}catch(error){console.log(request.headers)}
+  const {user} = request
+
+  const numberTodos = user.todos.length
+
+  if(!user.pro&&numberTodos>10){
+    return response.status(404).json({error: 'User can not create more todos!'})
+  }
+
+  return next();
 }
 
+//Middlewera -> Verifica se a todo existe
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const {username} = request.headers
+  const {id} = request.params
+
+  const user = users.find(user => user.username === username)
+  const todo = users.find(user => user.todos.id === id)
+
+  if(!user){
+    return response.status(404).json({error: 'User do not exist'})
+  } else if(!todo){
+    return response.status(404).json({error: 'Todo do not exist'})
+  }
+
+  request.user = user
+
+  return next();
 }
 
+//Middleware -> Verifica se o usuario existe a partir do uuid
 function findUserById(request, response, next) {
-  // Complete aqui
+  const {id} = request.params
+
+  const user = users.find(user => user.id === id)
+
+  if(!user){
+    return response.status(404).json({error: 'User do not exist'})
+  }
+
+  request.user = user
+
+  return next();
 }
 
 app.post('/users', (request, response) => {
